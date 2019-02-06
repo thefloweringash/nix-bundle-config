@@ -1,0 +1,24 @@
+---
+language: nix
+matrix:
+  include:
+    - script:
+        - source "$(nix-build --no-out-link '<nixpkgs>' -A glibcLocales)/nix-support/setup-hook"
+        - cd example
+        - nix-shell --run 'bundle config'
+        - nix-shell --run 'bundle && bundle exec ruby main.rb'
+
+    - script:
+        - source "$(nix-build --no-out-link '<nixpkgs>' -A glibcLocales)/nix-support/setup-hook"
+        - cd example
+        - nix-build -A bundleConfigFile -o .bundle/config
+        - nix-shell -p bundler --run 'bundle config'
+        - nix-shell -p ruby -p bundler --run 'bundle && bundle exec ruby main.rb'
+
+    - script:
+        - source "$(nix-build --no-out-link '<nixpkgs>' -A glibcLocales)/nix-support/setup-hook"
+        - cd example
+        - nix-build -A bashEnvFile -o env && source ./env
+        - nix-shell -p bundler --run 'bundle config --local path $BUNDLE_PATH'
+        - nix-shell -p bundler --run 'bundle config'
+        - nix-shell -p ruby -p bundler --run 'bundle && bundle exec ruby main.rb'
